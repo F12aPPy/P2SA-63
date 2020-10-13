@@ -4,9 +4,13 @@ import (
 	"context"
 	"fmt"
 	"strconv"
+	"time"
+
+	"github.com/F12aPPy/app/ent/babystatus"
+	"github.com/F12aPPy/app/ent/patient"
+	"github.com/F12aPPy/app/ent/user"
 
 	"github.com/F12aPPy/app/ent"
-	"github.com/F12aPPy/app/ent/antenatal"
 	"github.com/gin-gonic/gin"
 )
 
@@ -14,6 +18,14 @@ import (
 type AntenatalController struct {
 	client *ent.Client
 	router gin.IRouter
+}
+
+// Antenatal defines the struct for the antenatal
+type Antenatal struct {
+	PatientID    int
+	BabystatusID int
+	UserID       int
+	Added        string
 }
 
 // CreateAntenatal handles POST requests for adding antenatal entities
@@ -28,7 +40,7 @@ type AntenatalController struct {
 // @Failure 500 {object} gin.H
 // @Router /antenatals [post]
 func (ctl *AntenatalController) CreateAntenatal(c *gin.Context) {
-	obj := ent.Antenatal{}
+	obj := Antenatal{}
 	if err := c.ShouldBind(&obj); err != nil {
 		c.JSON(400, gin.H{
 			"error": "antenatal binding failed",
@@ -36,10 +48,51 @@ func (ctl *AntenatalController) CreateAntenatal(c *gin.Context) {
 		return
 	}
 
-	u, err := ctl.client.Antenatal.
+	p, err := ctl.client.Patient.
+		Query().
+		Where(patient.IDEQ(int(obj.PatientID))).
+		Only(context.Background())
+
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "patient not found",
+		})
+		return
+	}
+
+	u, err := ctl.client.User.
+		Query().
+		Where(user.IDEQ(int(obj.UserID))).
+		Only(context.Background())
+
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "user not found",
+		})
+		return
+	}
+
+	bs, err := ctl.client.Babystatus.
+		Query().
+		Where(babystatus.IDEQ(int(obj.BabystatusID))).
+		Only(context.Background())
+
+	if err != nil {
+		c.JSON(400, gin.H{
+			"error": "babystatus not found",
+		})
+		return
+	}
+
+	time, err := time.Parse(time.RFC3339, obj.Added)
+	a, err := ctl.client.Antenatal.
 		Create().
-		SetAddedTime(obj.AddedTime).
+		SetAddedTime(time).
+		SetUser(u).
+		SetPatient(p).
+		SetBabystatus(bs).
 		Save(context.Background())
+
 	if err != nil {
 		c.JSON(400, gin.H{
 			"error": "saving failed",
@@ -47,41 +100,7 @@ func (ctl *AntenatalController) CreateAntenatal(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
-}
-
-// GetAntenatal handles GET requests to retrieve a antenatal entity
-// @Summary Get a antenatal entity by ID
-// @Description get antenatal by ID
-// @ID get-antenatal
-// @Produce  json
-// @Param id path int true "Antenatal ID"
-// @Success 200 {object} ent.Antenatal
-// @Failure 400 {object} gin.H
-// @Failure 404 {object} gin.H
-// @Failure 500 {object} gin.H
-// @Router /antenatals/{id} [get]
-func (ctl *AntenatalController) GetAntenatal(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	u, err := ctl.client.Antenatal.
-		Query().
-		Where(antenatal.IDEQ(int(id))).
-		Only(context.Background())
-	if err != nil {
-		c.JSON(404, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	c.JSON(200, u)
+	c.JSON(200, a)
 }
 
 // ListAntenatal handles request to get a list of antenatal entities
@@ -116,11 +135,17 @@ func (ctl *AntenatalController) ListAntenatal(c *gin.Context) {
 
 	antenatals, err := ctl.client.Antenatal.
 		Query().
+		WithUser().
+		WithPatient().
+		WithBabystatus().
 		Limit(limit).
 		Offset(offset).
 		All(context.Background())
+
 	if err != nil {
-		c.JSON(400, gin.H{"error": err.Error()})
+		c.JSON(400, gin.H{
+			"error": err.Error(),
+		})
 		return
 	}
 
@@ -160,54 +185,14 @@ func (ctl *AntenatalController) DeleteAntenatal(c *gin.Context) {
 	c.JSON(200, gin.H{"result": fmt.Sprintf("ok deleted %v", id)})
 }
 
-// UpdateAntenatal handles PUT requests to update a antenatal entity
-// @Summary Update a antenatal entity by ID
-// @Description update antenatal by ID
-// @ID update-antenatal
-// @Accept   json
-// @Produce  json
-// @Param id path int true "Antenatal ID"
-// @Param antenatal body ent.Antenatal true "Antenatal entity"
-// @Success 200 {object} ent.Antenatal
-// @Failure 400 {object} gin.H
-// @Failure 500 {object} gin.H
-// @Router /antenatals/{id} [put]
-func (ctl *AntenatalController) UpdateAntenatal(c *gin.Context) {
-	id, err := strconv.ParseInt(c.Param("id"), 10, 64)
-	if err != nil {
-		c.JSON(400, gin.H{
-			"error": err.Error(),
-		})
-		return
-	}
-
-	obj := ent.Antenatal{}
-	if err := c.ShouldBind(&obj); err != nil {
-		c.JSON(400, gin.H{
-			"error": "antenatal binding failed",
-		})
-		return
-	}
-	obj.ID = int(id)
-	u, err := ctl.client.Antenatal.
-		UpdateOne(&obj).
-		Save(context.Background())
-	if err != nil {
-		c.JSON(400, gin.H{"error": "update failed"})
-		return
-	}
-
-	c.JSON(200, u)
-}
-
 // NewAntenatalController creates and registers handles for the antenatal controller
 func NewAntenatalController(router gin.IRouter, client *ent.Client) *AntenatalController {
-	uc := &AntenatalController{
+	ac := &AntenatalController{
 		client: client,
 		router: router,
 	}
-	uc.register()
-	return uc
+	ac.register()
+	return ac
 }
 
 // InitAntenatalController registers routes to the main engine
@@ -218,7 +203,5 @@ func (ctl *AntenatalController) register() {
 
 	// CRUD
 	antenatals.POST("", ctl.CreateAntenatal)
-	antenatals.GET(":id", ctl.GetAntenatal)
-	antenatals.PUT(":id", ctl.UpdateAntenatal)
 	antenatals.DELETE(":id", ctl.DeleteAntenatal)
 }

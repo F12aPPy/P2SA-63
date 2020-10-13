@@ -36,7 +36,7 @@ func (ctl *BabystatusController) CreateBabystatus(c *gin.Context) {
 		return
 	}
 
-	u, err := ctl.client.Babystatus.
+	bs, err := ctl.client.Babystatus.
 		Create().
 		SetBabystatusName(obj.BabystatusName).
 		Save(context.Background())
@@ -47,7 +47,7 @@ func (ctl *BabystatusController) CreateBabystatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, bs)
 }
 
 // GetBabystatus handles GET requests to retrieve a babystatus entity
@@ -70,7 +70,7 @@ func (ctl *BabystatusController) GetBabystatus(c *gin.Context) {
 		return
 	}
 
-	u, err := ctl.client.Babystatus.
+	bs, err := ctl.client.Babystatus.
 		Query().
 		Where(babystatus.IDEQ(int(id))).
 		Only(context.Background())
@@ -81,7 +81,7 @@ func (ctl *BabystatusController) GetBabystatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, bs)
 }
 
 // ListBabystatus handles request to get a list of babystatus entities
@@ -189,7 +189,7 @@ func (ctl *BabystatusController) UpdateBabystatus(c *gin.Context) {
 		return
 	}
 	obj.ID = int(id)
-	u, err := ctl.client.Babystatus.
+	bs, err := ctl.client.Babystatus.
 		UpdateOne(&obj).
 		Save(context.Background())
 	if err != nil {
@@ -197,17 +197,17 @@ func (ctl *BabystatusController) UpdateBabystatus(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, bs)
 }
 
 // NewBabystatusController creates and registers handles for the babystatus controller
 func NewBabystatusController(router gin.IRouter, client *ent.Client) *BabystatusController {
-	uc := &BabystatusController{
+	bsc := &BabystatusController{
 		client: client,
 		router: router,
 	}
-	uc.register()
-	return uc
+	bsc.register()
+	return bsc
 }
 
 // InitBabystatusController registers routes to the main engine

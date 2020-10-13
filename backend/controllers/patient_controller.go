@@ -36,7 +36,7 @@ func (ctl *PatientController) CreatePatient(c *gin.Context) {
 		return
 	}
 
-	u, err := ctl.client.Patient.
+	p, err := ctl.client.Patient.
 		Create().
 		SetPatientAge(obj.PatientAge).
 		SetPatientName(obj.PatientName).
@@ -48,7 +48,7 @@ func (ctl *PatientController) CreatePatient(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, p)
 }
 
 // GetPatient handles GET requests to retrieve a patient entity
@@ -71,7 +71,7 @@ func (ctl *PatientController) GetPatient(c *gin.Context) {
 		return
 	}
 
-	u, err := ctl.client.Patient.
+	p, err := ctl.client.Patient.
 		Query().
 		Where(patient.IDEQ(int(id))).
 		Only(context.Background())
@@ -82,7 +82,7 @@ func (ctl *PatientController) GetPatient(c *gin.Context) {
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, p)
 }
 
 // ListPatient handles request to get a list of patient entities
@@ -190,25 +190,27 @@ func (ctl *PatientController) UpdatePatient(c *gin.Context) {
 		return
 	}
 	obj.ID = int(id)
-	u, err := ctl.client.Patient.
+	p, err := ctl.client.Patient.
 		UpdateOne(&obj).
+		SetPatientName(obj.PatientName).
+		SetPatientAge(obj.PatientAge).
 		Save(context.Background())
 	if err != nil {
 		c.JSON(400, gin.H{"error": "update failed"})
 		return
 	}
 
-	c.JSON(200, u)
+	c.JSON(200, p)
 }
 
 // NewPatientController creates and registers handles for the patient controller
 func NewPatientController(router gin.IRouter, client *ent.Client) *PatientController {
-	uc := &PatientController{
+	pc := &PatientController{
 		client: client,
 		router: router,
 	}
-	uc.register()
-	return uc
+	pc.register()
+	return pc
 }
 
 // InitPatientController registers routes to the main engine

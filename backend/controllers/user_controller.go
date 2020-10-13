@@ -192,6 +192,8 @@ func (ctl *UserController) UpdateUser(c *gin.Context) {
 	obj.ID = int(id)
 	u, err := ctl.client.User.
 		UpdateOne(&obj).
+		SetUserEmail(obj.UserEmail).
+		SetUserName(obj.UserName).
 		Save(context.Background())
 	if err != nil {
 		c.JSON(400, gin.H{"error": "update failed"})
