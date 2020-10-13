@@ -13,6 +13,32 @@ import (
 	ginSwagger "github.com/swaggo/gin-swagger"
 )
 
+type Users struct {
+	User []User
+}
+
+type User struct {
+	UserName  string
+	UserEmail string
+}
+
+type Patients struct {
+	Patient []Patient
+}
+
+type Patient struct {
+	PatientName string
+	PatientAge  int
+}
+
+type Babystatuss struct {
+	Babystatus []Babystatus
+}
+
+type Babystatus struct {
+	Babystatus string
+}
+
 // @title SUT SA Example API
 // @version 1.0
 // @description This is a sample server for SUT SE 2563
@@ -57,7 +83,7 @@ func main() {
 	router := gin.Default()
 	router.Use(cors.Default())
 
-	client, err := ent.Open("sqlite3", "file:ent?mode=memory&cache=shared&_fk=1")
+	client, err := ent.Open("sqlite3", "file:ent.db?cache=shared&_fk=1")
 	if err != nil {
 		log.Fatalf("fail to open sqlite3: %v", err)
 	}
@@ -72,6 +98,48 @@ func main() {
 	controllers.NewPatientController(v1, client)
 	controllers.NewBabystatusController(v1, client)
 	controllers.NewAntenatalController(v1, client)
+
+	// Set Users Data
+	users := Users{
+		User: []User{
+			User{"นพ.แดง ดินดี", "Dang_dinde@gmail.com"},
+			User{"นพ.รักษา ไม่หาย", "raksaa10@hotmail.com"},
+		},
+	}
+
+	for _, u := range users.User {
+		client.User.
+			Create().
+			SetUserEmail(u.UserEmail).
+			SetUserName(u.UserName).
+			Save(context.Background())
+	}
+
+	// Set Patient Data
+	patients := Patients{
+		Patient: []Patient{
+			Patient{"นาง มาดี จริงใจ", 20},
+			Patient{"นาง สมหญิง นอนน้อย", 25},
+		},
+	}
+
+	for _, p := range patients.Patient {
+		client.Patient.
+			Create().
+			SetPatientName(p.PatientName).
+			SetPatientAge(p.PatientAge).
+			Save(context.Background())
+	}
+
+	// Set Babystatus Data
+	babystatuss := []string{"ไม่มีความผิดปกติ", "มีความผิดปกติที่ช่วงศรีษะ", "มีความผิดปกติที่ช่วงแขน", "มีความผิดปกติที่ช่วงลำตัว", "มีความผิดปกติที่ช่วงขา"}
+
+	for _, bs := range babystatuss {
+		client.Babystatus.
+			Create().
+			SetBabystatusName(bs).
+			Save(context.Background())
+	}
 
 	router.GET("/swagger/*any", ginSwagger.WrapHandler(swaggerFiles.Handler))
 	router.Run()

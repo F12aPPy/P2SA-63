@@ -211,68 +211,6 @@ paths:
           schema:
             $ref: '#/definitions/gin.H'
       summary: Delete a antenatal entity by ID
-    get:
-      description: get antenatal by ID
-      operationId: get-antenatal
-      parameters:
-      - description: Antenatal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ent.Antenatal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "404":
-          description: Not Found
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Get a antenatal entity by ID
-    put:
-      consumes:
-      - application/json
-      description: update antenatal by ID
-      operationId: update-antenatal
-      parameters:
-      - description: Antenatal ID
-        in: path
-        name: id
-        required: true
-        type: integer
-      - description: Antenatal entity
-        in: body
-        name: antenatal
-        required: true
-        schema:
-          $ref: '#/definitions/ent.Antenatal'
-      produces:
-      - application/json
-      responses:
-        "200":
-          description: OK
-          schema:
-            $ref: '#/definitions/ent.Antenatal'
-        "400":
-          description: Bad Request
-          schema:
-            $ref: '#/definitions/gin.H'
-        "500":
-          description: Internal Server Error
-          schema:
-            $ref: '#/definitions/gin.H'
-      summary: Update a antenatal entity by ID
   /babystatuss:
     get:
       description: list babystatus entities
