@@ -1,5 +1,16 @@
 basePath: /api/v1
 definitions:
+  controllers.Antenatal:
+    properties:
+      added:
+        type: string
+      babystatusID:
+        type: integer
+      patientID:
+        type: integer
+      userID:
+        type: integer
+    type: object
   ent.Antenatal:
     properties:
       added_time:
@@ -164,7 +175,7 @@ paths:
         name: antenatal
         required: true
         schema:
-          $ref: '#/definitions/ent.Antenatal'
+          $ref: '#/definitions/controllers.Antenatal'
       produces:
       - application/json
       responses:

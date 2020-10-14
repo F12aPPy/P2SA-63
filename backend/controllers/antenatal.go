@@ -34,7 +34,7 @@ type Antenatal struct {
 // @ID create-antenatal
 // @Accept   json
 // @Produce  json
-// @Param antenatal body ent.Antenatal true "Antenatal entity"
+// @Param antenatal body Antenatal true "Antenatal entity"
 // @Success 200 {object} ent.Antenatal
 // @Failure 400 {object} gin.H
 // @Failure 500 {object} gin.H

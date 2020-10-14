@@ -96,7 +96,7 @@ var doc = `{
                         "in": "body",
                         "required": true,
                         "schema": {
-                            "$ref": "#/definitions/ent.Antenatal"
+                            "$ref": "#/definitions/controllers.Antenatal"
                         }
                     }
                 ],
@@ -847,6 +847,23 @@ var doc = `{
         }
     },
     "definitions": {
+        "controllers.Antenatal": {
+            "type": "object",
+            "properties": {
+                "added": {
+                    "type": "string"
+                },
+                "babystatusID": {
+                    "type": "integer"
+                },
+                "patientID": {
+                    "type": "integer"
+                },
+                "userID": {
+                    "type": "integer"
+                }
+            }
+        },
         "ent.Antenatal": {
             "type": "object",
             "properties": {

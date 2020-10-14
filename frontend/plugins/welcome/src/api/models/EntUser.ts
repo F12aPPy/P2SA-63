@@ -13,6 +13,13 @@
  */
 
 import { exists, mapValues } from '../runtime';
+import {
+    EntUserEdges,
+    EntUserEdgesFromJSON,
+    EntUserEdgesFromJSONTyped,
+    EntUserEdgesToJSON,
+} from './';
+
 /**
  * 
  * @export
@@ -20,11 +27,11 @@ import { exists, mapValues } from '../runtime';
  */
 export interface EntUser {
     /**
-     * Age holds the value of the "age" field.
-     * @type {number}
+     * 
+     * @type {EntUserEdges}
      * @memberof EntUser
      */
-    age?: number;
+    edges?: EntUserEdges;
     /**
      * ID of the ent.
      * @type {number}
@@ -32,11 +39,17 @@ export interface EntUser {
      */
     id?: number;
     /**
-     * Name holds the value of the "name" field.
+     * UserEmail holds the value of the "user_email" field.
      * @type {string}
      * @memberof EntUser
      */
-    name?: string;
+    userEmail?: string;
+    /**
+     * UserName holds the value of the "user_name" field.
+     * @type {string}
+     * @memberof EntUser
+     */
+    userName?: string;
 }
 
 export function EntUserFromJSON(json: any): EntUser {
@@ -49,9 +62,10 @@ export function EntUserFromJSONTyped(json: any, ignoreDiscriminator: boolean): E
     }
     return {
         
-        'age': !exists(json, 'age') ? undefined : json['age'],
+        'edges': !exists(json, 'edges') ? undefined : EntUserEdgesFromJSON(json['edges']),
         'id': !exists(json, 'id') ? undefined : json['id'],
-        'name': !exists(json, 'name') ? undefined : json['name'],
+        'userEmail': !exists(json, 'user_email') ? undefined : json['user_email'],
+        'userName': !exists(json, 'user_name') ? undefined : json['user_name'],
     };
 }
 
@@ -64,9 +78,10 @@ export function EntUserToJSON(value?: EntUser | null): any {
     }
     return {
         
-        'age': value.age,
+        'edges': EntUserEdgesToJSON(value.edges),
         'id': value.id,
-        'name': value.name,
+        'user_email': value.userEmail,
+        'user_name': value.userName,
     };
 }
 

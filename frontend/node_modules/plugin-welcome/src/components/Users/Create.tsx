@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState,useEffect } from 'react';
 import { Link as RouterLink } from 'react-router-dom';
 import {
   Content,
@@ -16,6 +16,8 @@ import { DefaultApi } from '../../api/apis';
 import Select from '@material-ui/core/Select';
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
+import { EntBabystatus, EntPatient } from '../../api/models';
+import { EntUser } from '../../api/models/EntUser';
 
 const useStyles = makeStyles((theme: Theme) =>
   createStyles({
@@ -36,138 +38,234 @@ const useStyles = makeStyles((theme: Theme) =>
   }),
 );
 
-const initialUserState = {
+/*const initialUserState = {
   name: 'System Analysis and Design',
   age: 20,
-};
+};*/
 
 export default function Create() {
   const classes = useStyles();
   const profile = { givenName: 'ระบบฝากครรภ์' };
   const api = new DefaultApi();
 
-  const [user, setUser] = useState(initialUserState);
+  //const [user, setUser] = useState(initialUserState);
+  const [users, setUsers] = useState<EntUser[]>([]);
+  const [patients, setPatients] = useState<EntPatient[]>([]);
+  const [babystatuss, setBabystatuss] = useState<EntBabystatus[]>([]);
   const [status, setStatus] = useState(false);
   const [alert, setAlert] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const handleInputChange = (event: any) => {
-    const { id, value } = event.target;
-    setUser({ ...user, [id]: value });
+  const [userid, setUserid] = useState(Number);
+  const [patientid, setPatientid] = useState(Number);
+  const [babystatusid, setBabystatusid] = useState(Number);
+  const [datetime, setDatetime] = useState(String);
+
+  useEffect(() => {
+
+    const getPatients = async () => {
+
+      const pa = await api.listPatient({ limit: 10, offset: 0 });
+      setLoading(false);
+      setPatients(pa);
+    };
+    getPatients();
+
+    const getUsers = async () => {
+
+      const us = await api.listUser({ limit: 10, offset: 0 });
+      setLoading(false);
+      setUsers(us);
+    };
+    getUsers();
+
+    const getBabystatuss = async () => {
+
+      const bs = await api.listBabystatus({ limit: 10, offset: 0 });
+      setLoading(false);
+      setBabystatuss(bs);
+    };
+    getBabystatuss();
+
+  }, [loading]);
+
+  const handleDatetimeChange = (event: any) => {
+    setDatetime(event.target.value as string)
   };
 
-  const CreateUser = async () => {
-    const res: any = await api.createUser({ user });
+  const CreateAntenatal = async () => {
+    const antenatal = {
+      added: datetime + ":00+07:00",
+      patientID: patientid,
+      babystatusID: babystatusid,
+      userID: userid,
+    }
+    console.log(antenatal);
+    const res: any = await api.createAntenatal({ antenatal: antenatal });
     setStatus(true);
     if (res.id != '') {
       setAlert(true);
     } else {
       setAlert(false);
     }
+
     const timer = setTimeout(() => {
       setStatus(false);
     }, 1000);
   };
 
+  const patient_id_handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setPatientid(event.target.value as number);
+  };
+
+  const user_id_handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setUserid(event.target.value as number);
+  };
+
+  const babystatus_id_handleChange = (event: React.ChangeEvent<{ value: unknown }>) => {
+    setBabystatusid(event.target.value as number);
+  };
+
   return (
     <Page theme={pageTheme.home}>
       <Header
-        title={`Welcome to ${profile.givenName || 'to Backstage'}`}
-        subtitle="นพ.AAA BBBB"
+        title={`${profile.givenName || 'to Backstage'}`}
+        subtitle="บันทึกข้อมูลฝากครรภ์."
       ></Header>
       <Content>
-        <table border='0' width='90%' align='center'>
-          <tr>
-            <td><ContentHeader title="เพิ่มข้อมูลฝากครรภ์"></ContentHeader></td>
-            <td></td>
-            <td></td>
-            <td><Button variant="outlined" color="secondary" href="#outlined-buttons">
-              LogOut
-                </Button>
-            </td>
-          </tr>
-          <tr>
-            <td></td>
-            <td><font size='3'>ผู้ฝากครรภ์</font></td>
-            <td><FormControl
-              ///fullWidth
-              className={classes.margin}
-              variant="outlined"
-            >
-              <InputLabel id="label"></InputLabel>
-              <Select labelId="label" id="select" value="1" style={{ width: 400 }}>
-                <MenuItem value="1">30001 นาง สมหญิง นอนน้อย</MenuItem>
-                <MenuItem value="2">30002 นาง มาดี จริงใจ</MenuItem>
-              </Select>
-            </FormControl></td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td><font size='3'>แพทย์ที่ดูแล</font></td>
-            <td>
-              <FormControl
-                ///fullWidth
-                className={classes.margin}
-                variant="outlined"
-              >
-                <InputLabel id="label"></InputLabel>
-                <Select labelId="label" id="select" value="2" style={{ width: 400 }}>
-                  <MenuItem value="2">20001 นพ.AAA BBBB</MenuItem>
-                </Select>
-              </FormControl>
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td><font size='3'>สถานะเด็ก</font></td>
-            <td>
-              <FormControl
-                ///fullWidth
-                className={classes.margin}
-                variant="outlined"
-              >
-                <InputLabel id="label"></InputLabel>
-                <Select labelId="label" id="select" value="ปกติ" style={{ width: 400 }}>
-                  <MenuItem value="ปกติ">7001 ปกติ</MenuItem>
-                  <MenuItem value="ไม่ปกติ">7002 ไม่ปกติ</MenuItem>
-                </Select>
-              </FormControl>
-            </td>
-            <td></td>
-          </tr>
-          <tr>
-            <td></td>
-            <td><font size='3'>เวลา</font></td>
-            <td>
-              <FormControl className={classes.margin} >
-                <TextField
-                  id="datetime-local"
-                  label="DATE-TIME"
-                  type="datetime-local"
-                  defaultValue="2017-05-24T10:30"
-                  className={classes.textField}
-                  InputLabelProps={{
-                    shrink: true,
-                  }}
-                />
-              </FormControl>
-            </td>
-            <td></td>
-          </tr>
-        </table>
+        <ContentHeader title="Create">
+          {status ? (
+            <div>
+              {alert ? (
+                <Alert severity="success">
+                  This is a success alert — check it out!
+                </Alert>
+              ) : (
+                  <Alert severity="warning" style={{ marginTop: 20 }}>
+                    This is a warning alert — check it out!
+                  </Alert>
+                )}
+            </div>
+          ) : null}
+        </ContentHeader>
         <div className={classes.root}>
           <form noValidate autoComplete="off">
+            <table>
+              <tr><td align="right">Name</td><td>
+                <FormControl
+                  fullWidth
+                  className={classes.margin}
+                  variant="outlined"
+                >
+                  <InputLabel id="name_id-label">Name_ID</InputLabel>
+                  <Select
+                    labelId="user_id-label"
+                    label="User"
+                    id="user_id"
+                    value={userid}
+                    onChange={user_id_handleChange}
+                    style={{ width: 600 }}
+                  >
+                    {users.map((item: EntUser) =>
+                      <MenuItem value={item.id}>{item.userName}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </td></tr>
+              {/*
+              <FormControl
+                fullWidth
+                className={classes.margin}
+                variant="outlined"
+              >
+                <TextField
+                  id="age"
+                  label="Age"
+                  variant="outlined"
+                  type="number"
+                  size="medium"
+                  value={user.age}
+                  onChange={handleInputChange}
+                />
+              </FormControl>
+    */}
+
+              <tr><td align="right">Patient</td><td>
+
+                <FormControl
+                  className={classes.margin}
+                  variant="outlined"
+                >
+                  <InputLabel id="patient_id-label">Patient_ID</InputLabel>
+                  <Select
+                    labelId="patient_id-label"
+                    label="Patient"
+                    id="patient_id"
+                    value={patientid}
+                    onChange={patient_id_handleChange}
+                    style={{ width: 600 }}
+                  >
+                    {patients.map((item: EntPatient) =>
+                      <MenuItem value={item.id}>{item.patientName}</MenuItem>)}
+                  </Select>
+                </FormControl>
+              </td></tr>
+              <tr><td align="right">Babystatus</td><td>
+                <div>
+                  <FormControl
+                    className={classes.margin}
+                    variant="outlined"
+                  >
+
+                    <InputLabel id="babystatus_id-label">Babystatus_ID</InputLabel>
+                    <Select
+                      labelId="babystatus_id-label"
+                      label="babystatus"
+                      id="babystatus_id"
+                      value={babystatusid}
+                      onChange={babystatus_id_handleChange}
+                      style={{ width: 600 }}
+                    >
+                      {babystatuss.map((item: EntBabystatus) =>
+                        <MenuItem value={item.id}>{item.babystatusName}</MenuItem>)}
+                    </Select>
+                  </FormControl>
+                </div>
+              </td></tr>
+              <tr><td align="right">DateTime</td><td>
+                <div>
+                  <FormControl className={classes.margin} >
+                    <TextField
+                      id="date"
+                      label="DateTime"
+                      type="datetime-local"
+                      value={datetime}
+                      onChange={handleDatetimeChange}
+                      //defaultValue="2017-05-24"
+                      className={classes.textField}
+                      InputLabelProps={{
+                        shrink: true,
+                      }}
+                    />
+                  </FormControl>
+
+                </div>
+              </td></tr>
+            </table>
+
             <div className={classes.margin}>
               <Button
                 onClick={() => {
-                  CreateUser();
+                  CreateAntenatal();
+
                 }}
+                component={RouterLink}
+                to="/user"
                 variant="contained"
+
                 color="primary"
               >
-                Submit
-             </Button>
+                บันทึกข้อมูล
+                </Button>
               <Button
                 style={{ marginLeft: 20 }}
                 component={RouterLink}
@@ -175,7 +273,7 @@ export default function Create() {
                 variant="contained"
               >
                 Back
-             </Button>
+                </Button>
             </div>
           </form>
         </div>

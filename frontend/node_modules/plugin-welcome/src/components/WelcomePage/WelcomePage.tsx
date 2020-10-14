@@ -13,16 +13,16 @@ import {
 } from '@backstage/core';
  
 const WelcomePage: FC<{}> = () => {
- const profile = { givenName: 'ระบบฝากครรภ์' };
+ const profile = { givenName: 'ยินดีต้อนรับสู่ ระบบฝากครรภ์' };
  
  return (
    <Page theme={pageTheme.home}>
      <Header
-       title={`Welcome to ${profile.givenName || 'to Backstage'}`}
+       title={`${profile.givenName}`}
        subtitle="นพ.AAA BBBB"
      ></Header>
      <Content>
-       <ContentHeader title="ข้อมูลระบบฝากครรภ์">
+       <ContentHeader title="ตารางข้อมูลฝากครรภ์">
          <Link component={RouterLink} to="/user">
            <Button variant="contained" color="primary">
              Add User

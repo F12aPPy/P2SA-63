@@ -9,7 +9,10 @@ import TableRow from '@material-ui/core/TableRow';
 import Paper from '@material-ui/core/Paper';
 import Button from '@material-ui/core/Button';
 import { DefaultApi } from '../../api/apis';
- 
+import { EntAntenatal } from '../../api/models/EntAntenatal';
+import { EntBabystatus } from '../../api/models/EntBabystatus';
+import moment from 'moment';
+
 const useStyles = makeStyles({
  table: {
    minWidth: 650,
@@ -19,20 +22,30 @@ const useStyles = makeStyles({
 export default function ComponentsTable() {
  const classes = useStyles();
  const api = new DefaultApi();
- const [users, setUsers] = useState(Array);
+ //const [users, setUsers] = useState(Array);
+ const [antenatals, setAntenatal] = useState<EntAntenatal[]>([]);
+ const [babystatuss, setBabystatus] = useState<EntBabystatus[]>([]);
  const [loading, setLoading] = useState(true);
  
  useEffect(() => {
-   const getUsers = async () => {
-     const res = await api.listUser({ limit: 10, offset: 0 });
+   const getAntenatals = async () => {
+     const res = await api.listAntenatal({ limit: 10, offset: 0 });
      setLoading(false);
-     setUsers(res);
+     setAntenatal(res);
    };
-   getUsers();
+   getAntenatals();
+
+   const getBabystatus = async () => {
+    const res = await api.listBabystatus({ limit: 10, offset: 0 });
+    setLoading(false);
+    setBabystatus(res);
+    console.log(res);
+  };
+  getBabystatus();
  }, [loading]);
  
- const deleteUsers = async (id: number) => {
-   const res = await api.deleteUser({ id: id });
+ const deleteAntenatals = async (id: number) => {
+   const res = await api.deleteAntenatal({ id: id });
    setLoading(true);
  };
  
@@ -41,23 +54,26 @@ export default function ComponentsTable() {
      <Table className={classes.table} aria-label="simple table">
        <TableHead>
          <TableRow>
-           <TableCell align="center">ANTENATAL_ID</TableCell>
-           <TableCell align="center">PREGNANT_ID</TableCell>
-           <TableCell align="center">DOCTOR_ID</TableCell>
-           <TableCell align="center">BABYSTATUS_ID</TableCell>
-           <TableCell align="center">ADDED_TIME</TableCell>
+           <TableCell align="center">ลำดับ</TableCell>
+           <TableCell align="center">ผู้ป่วย</TableCell>
+           <TableCell align="center">แพทย์ที่ทำการตรวจ</TableCell>
+           <TableCell align="center">สถานะเด็กในครรภ์</TableCell>
+           <TableCell align="center">วันที่</TableCell>
+           <TableCell align="center">ลบข้อมูล</TableCell>
          </TableRow>
        </TableHead>
        <TableBody>
-         {users.map((item:any) => (
+         {antenatals.map((item:any) => (
            <TableRow key={item.id}>
              <TableCell align="center">{item.id}</TableCell>
-             <TableCell align="center">{item.name}</TableCell>
-             <TableCell align="center">{item.age}</TableCell>
+             <TableCell align="center">{item.edges.patient.patientName}</TableCell>
+             <TableCell align="center">{item.edges.user.userName}</TableCell>
+             <TableCell align="center">{item.edges.babystatus.babystatusName}</TableCell>
+             <TableCell align="center">{moment(item.addedTime).format('DD/MM/YYYY HH:mm')}</TableCell>
              <TableCell align="center">
                <Button
                  onClick={() => {
-                   deleteUsers(item.id);
+                  deleteAntenatals(item.id);
                  }}
                  style={{ marginLeft: 10 }}
                  variant="contained"
